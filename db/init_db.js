@@ -27,7 +27,8 @@ async function buildTables() {
                 datestart DATE NOT NULL, 
                 dateend DATE NOT NULL, 
                 timestart TIME, 
-                timeend TIME
+                timeend TIME, 
+                allday BOOLEAN DEFAULT false
             );
         `)
     } catch (error) {
@@ -62,12 +63,12 @@ async function populateInitialData() {
                 userid: 1, 
                 description: "this is the second to do item", 
                 datestart: '2022-09-30', 
-                dateend: '2022-09-31', 
+                dateend: '2022-10-01', 
                 timestart: '12:00:00', 
                 timeend: '14:00:00'
             }
         ]
-
+        console.log("creating to do items")
         const toDoItems = await Promise.all(toDoItemsToCreate.map(createToDoItem))
         console.log("to do items created!")
         console.log(toDoItems)
@@ -76,3 +77,8 @@ async function populateInitialData() {
         throw error;
     }
 }
+
+buildTables()
+    .then(populateInitialData)
+    .catch(console.error)
+    .finally(() => client.end())
