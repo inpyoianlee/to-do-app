@@ -26,7 +26,7 @@ usersRouter.get('/all', async (req, res) => {
 
 usersRouter.post('/login', async (req, res, next) => {
     const { username, password } = req.body;
-
+    console.log(username, password)
     // checking to see if the username or password is null
     if (!username || !password) {
         next({
@@ -60,7 +60,9 @@ usersRouter.post('/login', async (req, res, next) => {
 })
 
 usersRouter.post("/register", async (req, res, next) => {
+    console.log(req.body)
     const { username, password, email } = req.body
+
 
     try {
         const existingUserByEmail = await getUserByEmail(email)
@@ -121,7 +123,7 @@ usersRouter.get("/:id", async (req, res) => {
     }
 })
 
-usersRouter.patch("/update/:id", (req, res) => {
+usersRouter.patch("/update/:id", async (req, res) => {
     const { id } = req.params
     
     const { username, email, password } = req.body
@@ -134,7 +136,7 @@ usersRouter.patch("/update/:id", (req, res) => {
     })
 
     try {
-        const result = updateUser(id, userObj)
+        const result = await updateUser(id, userObj)
         res.send({
             message: "User successfully updated!", 
             updatedUser: result
@@ -144,11 +146,11 @@ usersRouter.patch("/update/:id", (req, res) => {
     }
 })
 
-usersRouter.delete("/delete/:id", (req, res) => {
+usersRouter.delete("/delete/:id", async (req, res) => {
     const { id } = req.params
 
     try {
-        const result = deleteUser(id)
+        const result = await deleteUser(id)
         res.send({
             message: "User successfully deleted!", 
             deletedUser: result
