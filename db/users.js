@@ -1,8 +1,6 @@
 const client = require("./client.js");
-const { hash, comparePasswords } = require("../utils");
 
 const createUser = async ({ username, password, email, isAdmin }) => {
-  const hashedPassword = hash(password);
 
   if (isAdmin !== "true") {
     isAdmin = false;
@@ -18,7 +16,7 @@ const createUser = async ({ username, password, email, isAdmin }) => {
         ON CONFLICT (username) DO NOTHING
         RETURNING id, username, email, isadmin;
       `,
-      [username, hashedPassword, email, isAdmin]
+      [username, password, email, isAdmin]
     );
 
     return user;
@@ -50,40 +48,6 @@ const updateUser = async (userId, fields = {}) => {
     );
 
     return user;
-  } catch (error) {
-    throw error;
-  }
-};
-
-const getUserByEmailAndPassword = async ({ email, password }) => {
-  try {
-    const {
-      rows: [user],
-    } = await client.query(
-      `
-        SELECT *
-        FROM users
-        WHERE email=$1
-        LIMIT 1;
-      `,
-      [email]
-    );
-    if (!user) {
-      return false;
-    }
-
-    const passwordMatch = comparePasswords(password, user.password);
-
-    if (!passwordMatch) {
-      return false;
-    }
-
-    return {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      isAdmin: user.isadmin,
-    };
   } catch (error) {
     throw error;
   }
@@ -137,7 +101,7 @@ const getUserByUsername = async ({ username }) => {
       rows: [user],
     } = await client.query(
       `
-        SELECT id, username, email, isadmin
+        SELECT id, username, password, email, isadmin
         FROM users
         WHERE username=$1;
       `,
@@ -189,7 +153,6 @@ const deleteUser = async (id) => {
 
 module.exports = {
   createUser,
-  getUserByEmailAndPassword,
   getUserById,
   updateUser,
   getUserByEmail,
